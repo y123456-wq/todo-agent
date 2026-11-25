@@ -5,8 +5,10 @@ import { z } from "zod";
 
 const storedTask = z.looseObject({ id: z.string(), title: z.string(), done: z.boolean() });
 const taskList = z.array(storedTask);
-type Task = z.infer<typeof storedTask>;
-type TaskChanges = Partial<Pick<Task, "title" | "done">>;
+// 基础字段之外允许扩展字段（到期时间、优先级、工作量、子任务关系等）。
+// looseObject 会保留未知字段，这里放行更新时的扩展键，便于智能体写入结构化信息。
+export type Task = z.infer<typeof storedTask>;
+export type TaskChanges = Partial<Omit<Task, "id">> & { [key: string]: unknown };
 
 export interface TaskStore {
   list(): Task[];
